@@ -30,7 +30,6 @@ public class FirstTest {
             page.fill("#password", "SuperSecretPassword!");
             page.click("button[type='submit']");
             assertTrue(page.locator(".flash.success").isVisible());
-            page.waitForTimeout(2000);
             browser.close();
         }
     }
@@ -45,7 +44,6 @@ public class FirstTest {
             page.fill("#password", "wrongpassword");
             page.click("button[type='submit']");
             assertTrue(page.locator(".flash.error").isVisible());
-            page.waitForTimeout(2000);
             browser.close();
         }
     }
@@ -107,8 +105,7 @@ public class FirstTest {
             data.put("job", "QA Automation Engineer");
 
             APIResponse response = request.post("https://reqres.in/api/users",
-                    RequestOptions.create().setData(data));
-
+            RequestOptions.create().setData(data));
             assertEquals(201, response.status());
             assertTrue(response.text().contains("Anusha"));
             request.dispose();
@@ -126,6 +123,20 @@ public class FirstTest {
             assertEquals(response.status(),200);
             assertTrue(response.text().contains("Senior"));
             request.dispose();
+        }
+    }
+
+    @Test
+    void explicitWaitTest() {
+        try (Playwright playwright = Playwright.create()) {
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            Page page = browser.newPage();
+            page.navigate("https://the-internet.herokuapp.com/dynamic_loading/1");
+            page.click("button");
+            page.waitForSelector("#finish", new Page.WaitForSelectorOptions().setTimeout(10000));
+            assertTrue(page.locator("#finish").isVisible());
+            page.waitForTimeout(1000);
+            browser.close();
         }
     }
 }

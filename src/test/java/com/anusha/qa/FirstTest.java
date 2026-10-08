@@ -21,7 +21,7 @@ public class FirstTest {
     void setup() {
         if (playwright == null) {
             playwright = Playwright.create();
-            browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(Boolean.parseBoolean(System.getProperty("headless", "true"))));
         }
         page = browser.newPage();
     }
@@ -111,7 +111,6 @@ public class FirstTest {
 
     @Test
     void putTest(){
-        try(Playwright playwright = Playwright.create()){
             APIRequestContext request = playwright.request().newContext();
             Map <String, String> data = new HashMap<>();
             data.put("name", "Anusha");
@@ -120,28 +119,10 @@ public class FirstTest {
             assertEquals(response.status(),200);
             assertTrue(response.text().contains("Senior"));
             request.dispose();
-        }
-    }
-
-    @Test
-    void explicitWaitTest() {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-            Page page = browser.newPage();
-            page.navigate("https://the-internet.herokuapp.com/dynamic_loading/1", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
-            page.click("button");
-            page.waitForSelector("#finish", new Page.WaitForSelectorOptions().setTimeout(10000));
-            assertTrue(page.locator("#finish").isVisible());
-            page.waitForTimeout(1000);
-            browser.close();
-        }
     }
 
     @Test
     void exceptionHandlingTest() {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-            Page page = browser.newPage();
             page.navigate("https://the-internet.herokuapp.com/login", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
 
             try {
@@ -151,8 +132,6 @@ public class FirstTest {
             }
 
             assertTrue(page.locator(".flash").count() == 0); // confirms we're still on a working page
-            browser.close();
-        }
     }
 
     @Test

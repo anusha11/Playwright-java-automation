@@ -6,110 +6,107 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Map;
 import java.util.HashMap;
 import com.microsoft.playwright.options.RequestOptions;
+import com.microsoft.playwright.options.WaitUntilState;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 
 public class FirstTest {
+
+    static Playwright playwright;
+    static Browser browser;
+    Page page;
+
+    @BeforeEach
+    void setup() {
+        if (playwright == null) {
+            playwright = Playwright.create();
+            browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+        }
+        page = browser.newPage();
+    }
+
+    @AfterEach
+    void teardown() {
+        page.close();
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        browser.close();
+        playwright.close();
+    }
+
     @Test
     void hasTitle() {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-            Page page = browser.newPage();
-            page.navigate("https://playwright.dev");
-            assertTrue(page.locator("text=Get started").isVisible());
-            assertTrue(page.title().contains("Playwright"));
-            browser.close();
-        }
+        page.navigate("https://practice.expandtesting.com", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+        assertTrue(page.locator("text=Demos").isVisible());
+        assertTrue(page.title().contains("Automation Testing Practice"));
     }
 
     @Test
     void loginTest() {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-            Page page = browser.newPage();
-            page.navigate("https://the-internet.herokuapp.com/login");
-            page.fill("#username", "tomsmith");
-            page.fill("#password", "SuperSecretPassword!");
-            page.click("button[type='submit']");
-            assertTrue(page.locator(".flash.success").isVisible());
-            browser.close();
-        }
+        page.navigate("https://practice.expandtesting.com/login", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+        page.fill("#username", "practice");
+        page.fill("#password", "SuperSecretPassword!");
+        page.click("button[type='submit']");
+        page.waitForSelector(".alert.alert-success", new Page.WaitForSelectorOptions().setTimeout(2000));
+        assertTrue(page.locator(".alert.alert-success.alert").isVisible());
     }
 
     @Test
     void loginFailureTest() {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-            Page page = browser.newPage();
-            page.navigate("https://the-internet.herokuapp.com/login");
-            page.fill("#username", "wronguser");
-            page.fill("#password", "wrongpassword");
-            page.click("button[type='submit']");
-            assertTrue(page.locator(".flash.error").isVisible());
-            browser.close();
-        }
+        page.navigate("https://practice.expandtesting.com/login", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+        page.fill("#username", "wronguser");
+        page.fill("#password", "wrongpassword");
+        page.click("button[type='submit']");
+        page.waitForSelector(".alert.alert-danger", new Page.WaitForSelectorOptions().setTimeout(2000));
+        assertTrue(page.locator(".alert.alert-danger").isVisible());
     }
 
     @Test
     void dropdownAndCheckboxTest() {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-            Page page = browser.newPage();
+        // Dropdown
+        page.navigate("https://the-internet.herokuapp.com/dropdown", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+        page.selectOption("#dropdown", "2");
+        assertTrue(page.locator("#dropdown").inputValue().equals("2"));
 
-            // Dropdown
-            page.navigate("https://the-internet.herokuapp.com/dropdown");
-            page.selectOption("#dropdown", "2");
-            assertTrue(page.locator("#dropdown").inputValue().equals("2"));
-
-            // Checkbox
-            page.navigate("https://the-internet.herokuapp.com/checkboxes");
-            page.locator("input[type='checkbox']").first().check();
-            assertTrue(page.locator("input[type='checkbox']").first().isChecked());
-
-            page.waitForTimeout(2000);
-            browser.close();
-        }
+        // Checkbox
+        page.navigate("https://the-internet.herokuapp.com/checkboxes", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+        page.locator("input[type='checkbox']").first().check();
+        assertTrue(page.locator("input[type='checkbox']").first().isChecked());
     }
 
     @Test
     void loginTestWithPOM() {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-            Page page = browser.newPage();
-            LoginPage loginPage = new LoginPage(page);
+        LoginPage loginPage = new LoginPage(page);
 
-            loginPage.navigate();
-            loginPage.login("tomsmith", "SuperSecretPassword!");
-            assertTrue(loginPage.isSuccessMessageVisible());
-
-            page.waitForTimeout(2000);
-            browser.close();
-        }
+        loginPage.navigate();
+        loginPage.login("practice", "SuperSecretPassword!");
+        assertTrue(loginPage.isSuccessMessageVisible());
     }
 
     @Test
     void apiTest() {
-        try (Playwright playwright = Playwright.create()) {
-            APIRequestContext request = playwright.request().newContext();
-            APIResponse response = request.get("https://reqres.in/api/users/2");
-            assertEquals(200, response.status());
-            assertTrue(response.text().contains("Janet"));
-            request.dispose();
-        }
+        APIRequestContext request = playwright.request().newContext();
+        APIResponse response = request.get("https://practice.expandtesting.com/notes/api/health-check");
+        assertEquals(200, response.status());
+        assertTrue(response.text().contains("Notes API is Running"));
+        request.dispose();
     }
 
     @Test
     void apiPostTest() {
-        try (Playwright playwright = Playwright.create()) {
-            APIRequestContext request = playwright.request().newContext();
-            Map<String, String> data = new HashMap<>();
-            data.put("name", "Anusha");
-            data.put("job", "QA Automation Engineer");
+        APIRequestContext request = playwright.request().newContext();
+        Map<String, String> data = new HashMap<>();
+        data.put("name", "Anusha");
+        data.put("job", "QA Automation Engineer");
 
-            APIResponse response = request.post("https://reqres.in/api/users",
-            RequestOptions.create().setData(data));
-            assertEquals(201, response.status());
-            assertTrue(response.text().contains("Anusha"));
-            request.dispose();
-        }
+        APIResponse response = request.post("https://reqres.in/api/users",
+        RequestOptions.create().setData(data));
+        assertEquals(201, response.status());
+        assertTrue(response.text().contains("Anusha"));
+        request.dispose();
     }
 
     @Test
@@ -131,12 +128,39 @@ public class FirstTest {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
             Page page = browser.newPage();
-            page.navigate("https://the-internet.herokuapp.com/dynamic_loading/1");
+            page.navigate("https://the-internet.herokuapp.com/dynamic_loading/1", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
             page.click("button");
             page.waitForSelector("#finish", new Page.WaitForSelectorOptions().setTimeout(10000));
             assertTrue(page.locator("#finish").isVisible());
             page.waitForTimeout(1000);
             browser.close();
         }
+    }
+
+    @Test
+    void exceptionHandlingTest() {
+        try (Playwright playwright = Playwright.create()) {
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            Page page = browser.newPage();
+            page.navigate("https://the-internet.herokuapp.com/login", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+
+            try {
+                page.waitForSelector("#nonexistent-element", new Page.WaitForSelectorOptions().setTimeout(3000));
+            } catch (TimeoutError e) {
+                System.out.println("Expected failure caught: " + e.getMessage());
+            }
+
+            assertTrue(page.locator(".flash").count() == 0); // confirms we're still on a working page
+            browser.close();
+        }
+    }
+
+    @Test
+    void practiceLoginTest() {
+        page.navigate("https://practicetestautomation.com/practice-test-login/");
+        page.fill("#username", "student");
+        page.fill("#password", "Password123");
+        page.click("#submit");
+        assertTrue(page.locator(".post-title").isVisible());
     }
 }

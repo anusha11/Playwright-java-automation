@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.HashMap;
 import com.microsoft.playwright.options.RequestOptions;
 import com.microsoft.playwright.options.WaitUntilState;
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import com.microsoft.playwright.options.AriaRole;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
@@ -141,5 +143,14 @@ public class FirstTest {
         page.fill("#password", "Password123");
         page.click("#submit");
         assertTrue(page.locator(".post-title").isVisible());
+    }
+
+    @Test
+    void codegenLoginTest() {
+        page.navigate("https://practicetestautomation.com/practice-test-login/");
+        page.getByLabel("Username").fill("student");
+        page.getByLabel("Password").fill("Password123");
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Submit")).click();
+        assertThat(page.locator(".post-title")).isVisible();
     }
 }

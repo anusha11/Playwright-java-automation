@@ -42,7 +42,7 @@ public class FirstTest {
     @Test
     void hasTitle() {
         page.navigate("https://practice.expandtesting.com", new Page.NavigateOptions().setTimeout(60000).setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
-        assertTrue(page.locator("text=Demos").isVisible());
+        assertThat(page.locator("text=Demos")).isVisible();
         assertTrue(page.title().contains("Automation Testing Practice"));
     }
 
@@ -53,7 +53,7 @@ public class FirstTest {
         page.fill("#password", "SuperSecretPassword!");
         page.click("button[type='submit']");
         page.waitForSelector(".alert.alert-success", new Page.WaitForSelectorOptions().setTimeout(2000));
-        assertTrue(page.locator(".alert.alert-success.alert").isVisible());
+        assertThat(page.locator(".alert.alert-success.alert")).isVisible();
     }
 
     @Test
@@ -63,7 +63,7 @@ public class FirstTest {
         page.fill("#password", "wrongpassword");
         page.click("button[type='submit']");
         page.waitForSelector(".alert.alert-danger", new Page.WaitForSelectorOptions().setTimeout(2000));
-        assertTrue(page.locator(".alert.alert-danger").isVisible());
+        assertThat(page.locator(".alert.alert-danger")).isVisible();
     }
 
     @Test
@@ -142,7 +142,7 @@ public class FirstTest {
         page.fill("#username", "student");
         page.fill("#password", "Password123");
         page.click("#submit");
-        assertTrue(page.locator(".post-title").isVisible());
+        assertThat(page.locator(".post-title")).isVisible();
     }
 
     @Test

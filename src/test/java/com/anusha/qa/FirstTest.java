@@ -12,6 +12,8 @@ import com.microsoft.playwright.options.AriaRole;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class FirstTest {
 
@@ -152,5 +154,18 @@ public class FirstTest {
         page.getByLabel("Password").fill("Password123");
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Submit")).click();
         assertThat(page.locator(".post-title")).isVisible();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "incorrectUser, Password123, Your username is invalid!",
+        "student, incorrectPassword, Your password is invalid!"
+    })
+    void invalidLoginShowsError(String username, String password, String expectedMessage) {
+        page.navigate("https://practicetestautomation.com/practice-test-login/");
+        page.getByLabel("Username").fill(username);
+        page.getByLabel("Password").fill(password);
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Submit")).click();
+        assertThat(page.locator("#error")).hasText(expectedMessage);
     }
 }

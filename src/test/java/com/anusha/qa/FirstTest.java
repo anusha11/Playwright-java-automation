@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import java.nio.file.Paths;
+import org.junit.jupiter.api.TestInfo;
 
 public class FirstTest {
 
@@ -31,7 +33,10 @@ public class FirstTest {
     }
 
     @AfterEach
-    void teardown() {
+    void teardown(TestInfo testInfo) {
+        String name = testInfo.getDisplayName().replaceAll("[^a-zA-Z0-9._-]", "_");
+        page.screenshot(new Page.ScreenshotOptions()
+        .setPath(Paths.get("target/screenshots/" + name + ".png")));
         page.close();
     }
 

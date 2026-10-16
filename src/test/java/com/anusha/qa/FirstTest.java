@@ -164,7 +164,8 @@ public class FirstTest {
     @ParameterizedTest
     @CsvSource({
         "incorrectUser, Password123, Your username is invalid!",
-        "student, incorrectPassword, Your password is invalid!"
+        "student, incorrectPassword, Your password is invalid!",
+        "'', '', Your username is invalid!"
     })
     void invalidLoginShowsError(String username, String password, String expectedMessage) {
         page.navigate("https://practicetestautomation.com/practice-test-login/");
